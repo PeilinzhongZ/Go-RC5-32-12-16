@@ -10,20 +10,20 @@ const (
 	r   = 12
 	b   = 16
 	t   = 2 * (r + 1)
-	P_w = 0xb7e15163
-	Q_w = 0x9e3779b9
+	P_w = 0xB7E15163
+	Q_w = 0x9E3779B9
 )
 
 type cipher32 struct {
 	S [t]uint32
 }
 
-func RC5_SETUP(key []byte) {
+func RC5_SETUP(key []byte) (cipher32, bool) {
 	if len(key) != b {
-		return
+		return cipher32{}, false
 	}
 
-	S := make([]uint32, t)
+	var S [t]uint32
 	S[0] = P_w
 	for i := uint(1); i < t; i++ {
 		S[i] = S[i-1] + Q_w
@@ -44,14 +44,15 @@ func RC5_SETUP(key []byte) {
 		L[j] = bits.RotateLeft32(L[j]+(A+B), int(A+B))
 		B = L[j]
 		i = (i + 1) % t
-		j = (j + 1) % (w / 8)
+		j = (j + 1) % (b / (w / 8))
 	}
+	return cipher32{S}, true
 }
 
 func (C *cipher32) RC5_ENCRYPT(pt, ct []byte) {
 	A := binary.LittleEndian.Uint32(pt[:w/8]) + C.S[0]
 	B := binary.LittleEndian.Uint32(pt[w/8:]) + C.S[1]
-	for i := 0; i < r; i++ {
+	for i := 1; i <= r; i++ {
 		A = bits.RotateLeft32(A^B, int(B)) + C.S[2*i]
 		B = bits.RotateLeft32(B^A, int(A)) + C.S[2*i+1]
 	}
