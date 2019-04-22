@@ -8,7 +8,7 @@ import (
 
 func TestCipher32(t *testing.T) {
 	random := rand.New(rand.NewSource(99))
-	max := 1
+	max := 5000
 
 	var encrypted [8]byte
 	var decrypted [8]byte
