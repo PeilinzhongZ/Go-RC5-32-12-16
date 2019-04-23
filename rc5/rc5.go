@@ -6,12 +6,13 @@ import (
 )
 
 const (
-	w   = 32
-	r   = 12
-	b   = 16
-	t   = 2 * (r + 1)
-	P_w = 0xB7E15163
-	Q_w = 0x9E3779B9
+	w   = 32          // The length of a word in bits, typically 16, 32 or 64.
+	r   = 20          // The number of rounds to use when encrypting data.
+	b   = 16          // The length of the key in bytes.
+	c   = 4           // number  words in key = ceil(8*b/w)
+	t   = 2 * (r + 1) // The number of round subkeys required.
+	P_w = 0xb7e15163  // First Magic constant
+	Q_w = 0x9e3779b9  // Second Magic constant
 )
 
 type cipher32 struct {
@@ -23,28 +24,31 @@ func RC5_SETUP(key []byte) (cipher32, bool) {
 		return cipher32{}, false
 	}
 
-	var S [t]uint32
-	S[0] = P_w
-	for i := uint(1); i < t; i++ {
-		S[i] = S[i-1] + Q_w
-	}
-
+	// converting secret key K from bytes to words.
 	var L [w / 8]uint32
 	for i := 0; i < w/8; i++ {
 		L[i] = binary.LittleEndian.Uint32(key[:w/8])
 		key = key[w/8:]
 	}
 
+	// Initializing sub-key S with magic constant P_w and Q_w
+	var S [t]uint32
+	S[0] = P_w
+	for i := uint(1); i < t; i++ {
+		S[i] = S[i-1] + Q_w
+	}
+
 	var A uint32
 	var B uint32
 	var i, j int
+	// Sub-key mixing.
 	for k := 0; k < 3*t; k++ {
 		S[i] = bits.RotateLeft32(S[i]+(A+B), 3)
 		A = S[i]
 		L[j] = bits.RotateLeft32(L[j]+(A+B), int(A+B))
 		B = L[j]
 		i = (i + 1) % t
-		j = (j + 1) % (b / (w / 8))
+		j = (j + 1) % c
 	}
 	return cipher32{S}, true
 }
