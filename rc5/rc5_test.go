@@ -36,9 +36,9 @@ func TestRC5_TESTVECTORS(t *testing.T) {
 	var encrypted [8]byte
 	var decrypted [8]byte
 
-	key, _ := hex.DecodeString("000102030405060708090A0B0C0D0E0F")
-	pt, _ := hex.DecodeString("0001020304050607")
-	ct, _ := hex.DecodeString("2A0EDC0E9431FF73")
+	key, _ := hex.DecodeString("5269F149D41BA0152497574D7F153125")
+	pt, _ := hex.DecodeString("65C178B284D197CC")
+	ct, _ := hex.DecodeString("EB44E415DA319824")
 
 	cipher, ok := RC5_SETUP(key)
 	if ok {

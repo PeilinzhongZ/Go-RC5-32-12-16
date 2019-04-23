@@ -7,7 +7,7 @@ import (
 
 const (
 	w   = 32          // The length of a word in bits, typically 16, 32 or 64.
-	r   = 20          // The number of rounds to use when encrypting data.
+	r   = 12          // The number of rounds to use when encrypting data.
 	b   = 16          // The length of the key in bytes.
 	c   = 4           // number  words in key = ceil(8*b/w)
 	t   = 2 * (r + 1) // The number of round subkeys required.
