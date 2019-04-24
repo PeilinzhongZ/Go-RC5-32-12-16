@@ -15,16 +15,18 @@ This step converts the b-byte (b=number of 8-bit bytes in the key) key into a se
 for(i = b-1, L[c-1] = 0; i != -1; i--)
       L[i/u] = (L[i/u] << 8) + K[i];
 ```
+> u = w / 8
 
 #### Step-2: Initialize the expanded key table
 This step fills in the S table with magic constant Pw and Qw.
 * For w = 16: Pw = 0xB7E1, Qw = 0x9E37
-* For w = 16: Pw = 0xB7E15163, Qw = 0x9E3779B9
-* For w = 16: Pw = 0xB7E151628AED2A6B, Qw = 0x9E3779B97F4A7C15
+* For w = 32: Pw = 0xB7E15163, Qw = 0x9E3779B9
+* For w = 64: Pw = 0xB7E151628AED2A6B, Qw = 0x9E3779B97F4A7C15
 ```
-for(S[0] = P, i = 1; i < t; i++)
-      S[i] = S[i-1] + Q;
+for(S[0] = Pw, i = 1; i < t; i++)
+      S[i] = S[i-1] + Qw;
 ```
+> t = 2 * (r+1)
 
 #### Step-3: Mix in the secret key
 This step is mixing secret key L with key table S
@@ -35,7 +37,8 @@ for(A = B = i = j = k = 0; k < 3 * t; k++, i = (i+1) % t, j = (j+1) % c)
       B = L[j] = ROTL(L[j] + (A + B), (A + B));
    }
 ```
-> t = 2*(r+1), c = number words in key = ceil(8*b/w)
+> t = 2 * (r+1), c = number words in key = ceil(8 * b / w)
+
 //pic
 
 ### Encryption
