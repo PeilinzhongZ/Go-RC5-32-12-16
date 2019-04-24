@@ -78,6 +78,8 @@ out[2] = (A >> 16) & 0xFF;
 out[3] = (A >> 24) & 0xFF;
 out[4] = (B >>  0) & 0xFF;
 out[5] = (B >>  8) & 0xFF;
+out[6] = (B >>  16) & 0xFF;
+out[7] = (B >>  24) & 0xFF;
 ```
 
 ### Decryption
