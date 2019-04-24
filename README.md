@@ -31,10 +31,13 @@ for(S[0] = Pw, i = 1; i < t; i++)
 #### Step-3: Mix in the secret key
 This step is mixing secret key L with key table S
 ```
-for(A = B = i = j = k = 0; k < 3 * t; k++, i = (i+1) % t, j = (j+1) % c)
+A = B = i = j = 0
+for(k = 0; k < 3 * t; k++)
 {
    A = S[i] = ROTL(S[i] + (A + B), 3);
    B = L[j] = ROTL(L[j] + (A + B), (A + B));
+   i = (i+1) % t
+   j = (j+1) % c
 }
 ```
 > t = 2 * (r+1), c = number words in key = ceil(8 * b / w)
