@@ -17,6 +17,8 @@ for(i = b-1, L[c-1] = 0; i != -1; i--)
 ```
 > u = w / 8
 
+![keyExpand1](Images/keyExpand1.png)
+
 #### Step-2: Initialize the expanded key table
 This step fills in the S table with magic constant Pw and Qw.
 * For w = 16: Pw = 0xB7E1, Qw = 0x9E37
@@ -27,6 +29,8 @@ for(S[0] = Pw, i = 1; i < t; i++)
    S[i] = S[i-1] + Qw;
 ```
 > t = 2 * (r+1)
+
+![keyExpand2](Images/keyExpand2.png)
 
 #### Step-3: Mix in the secret key
 This step is mixing secret key L with key table S
@@ -42,7 +46,7 @@ for(k = 0; k < 3 * t; k++)
 ```
 > t = 2 * (r+1), c = number words in key = ceil(8 * b / w)
 
-//pic
+![keyExpand3](Images/keyExpand3.png)
 
 ### Encryption
 #### Step-1: Load A and B values
