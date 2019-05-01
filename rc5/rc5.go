@@ -2,6 +2,7 @@ package rc5
 
 import (
 	"encoding/binary"
+	// "fmt"
 	"math/bits"
 )
 
@@ -16,10 +17,12 @@ const (
 )
 
 type cipher32 struct {
-	S [t]uint32 //The round subkey words that used in each round
+	S      [t]uint32 //The round subkey words that used in each round
+	Mode   int
+	Vector uint64
 }
 
-func RC5_SETUP(key []byte) (cipher32, bool) {
+func RC5_SETUP(key []byte, iv []byte, mode string) (cipher32, bool) {
 	// Check if the length of key in bytes equal to 16
 	if len(key) != b {
 		return cipher32{}, false
@@ -51,14 +54,25 @@ func RC5_SETUP(key []byte) (cipher32, bool) {
 		i = (i + 1) % t
 		j = (j + 1) % c
 	}
-	return cipher32{S}, true
+	if mode == "CBC" {
+		return cipher32{S, 1, binary.BigEndian.Uint64(iv)}, true
+	} else if mode == "CFB" {
+		return cipher32{S, 2, binary.BigEndian.Uint64(iv)}, true
+	}
+	return cipher32{S, 0, 0}, true
 }
 
 func (C *cipher32) RC5_ENCRYPT(pt, ct []byte) {
+	var ptTemp = make([]byte, len(pt))
+	copy(ptTemp, pt)
+	if C.Mode == 1 {
+		ptNum := binary.BigEndian.Uint64(ptTemp) ^ C.Vector
+		binary.BigEndian.PutUint64(ptTemp, ptNum)
+	}
 	// First converts input bytes into two unsigned integers in word size 32 called A and B
 	// Read A and B in byte-reverse order then added with S[0] and S[1]
-	A := binary.LittleEndian.Uint32(pt[:w/8]) + C.S[0]
-	B := binary.LittleEndian.Uint32(pt[w/8:]) + C.S[1]
+	A := binary.LittleEndian.Uint32(ptTemp[:w/8]) + C.S[0]
+	B := binary.LittleEndian.Uint32(ptTemp[w/8:]) + C.S[1]
 	for i := 1; i <= r; i++ {
 		// A = ((A XOR B) <<< B) + S[2*i]
 		A = bits.RotateLeft32(A^B, int(B)) + C.S[2*i]
@@ -68,6 +82,9 @@ func (C *cipher32) RC5_ENCRYPT(pt, ct []byte) {
 	// Write A and B in byte-reverse order
 	binary.LittleEndian.PutUint32(ct[:w/8], A)
 	binary.LittleEndian.PutUint32(ct[w/8:], B)
+	if C.Mode == 1 {
+		C.Vector = binary.BigEndian.Uint64(ct[:])
+	}
 }
 
 func (C *cipher32) RC5_DECRYPT(ct, pt []byte) {
@@ -84,4 +101,9 @@ func (C *cipher32) RC5_DECRYPT(ct, pt []byte) {
 	// Write A-S[0] and B-S[1] in byte-reverse order
 	binary.LittleEndian.PutUint32(pt[w/8:], B-C.S[1])
 	binary.LittleEndian.PutUint32(pt[:w/8], A-C.S[0])
+	if C.Mode == 1 {
+		ptNum := binary.BigEndian.Uint64(pt[:]) ^ C.Vector
+		binary.BigEndian.PutUint64(pt, ptNum)
+		C.Vector = binary.BigEndian.Uint64(ct[:])
+	}
 }

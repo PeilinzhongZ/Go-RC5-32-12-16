@@ -13,7 +13,7 @@ import (
 
 func TestRC5_Random(t *testing.T) {
 	random := rand.New(rand.NewSource(99))
-	max := 5000
+	max := 1
 
 	var encrypted [8]byte
 	var decrypted [8]byte
@@ -24,13 +24,18 @@ func TestRC5_Random(t *testing.T) {
 		value := make([]byte, 8)
 		random.Read(value)
 
-		cipher, ok := RC5_SETUP(key)
+		iv := make([]byte, 8)
+		random.Read(iv)
+
+		cipher, ok := RC5_SETUP(key, iv, "CBC")
 		if ok {
 			cipher.RC5_ENCRYPT(value[:], encrypted[:])
+
+			cipher, _ := RC5_SETUP(key, iv, "CBC")
 			cipher.RC5_DECRYPT(encrypted[:], decrypted[:])
 
-			if !bytes.Equal(decrypted[:], value[:]) {
-				t.Errorf("encryption/decryption failed: % 02x != % 02x\n", decrypted, value)
+			if !bytes.Equal(value[:], decrypted[:]) {
+				t.Errorf("encryption/decryption failed: % 02x != % 02x\n", value, decrypted)
 			}
 		}
 	}
@@ -54,7 +59,7 @@ func runTest(vectors []map[string]string, t *testing.T) {
 		pt, _ := hex.DecodeString(item["Input"])
 		ct, _ := hex.DecodeString(item["Output"])
 
-		cipher, ok := RC5_SETUP(key)
+		cipher, ok := RC5_SETUP(key, []byte(""), "None")
 		if ok {
 			cipher.RC5_ENCRYPT(pt[:], encrypted[:])
 			if !bytes.Equal(ct[:], encrypted[:]) {
