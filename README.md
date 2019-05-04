@@ -90,4 +90,21 @@ out[7] = (B >>  24) & 0xFF;
 ```
 
 ### Decryption
-Since this is the symetric encryption, the decryption is the inverse of the encrypt operation. 
+Since this is the symetric encryption, the decryption is the inverse of the encrypt operation.
+
+
+## Supporting CBC (Cipher Block Chaining) mode
+```
+type cipher32 struct {
+	S      [t]uint32 //The round subkey words that used in each round
+	Mode   int       // indicate mode of cipher
+	Vector uint64    // used to store the Vector used in next block
+}
+```
+- Adding a member, Vector, to store the vectore used in next block
+
+### CBC mode encryption
+![cbc_encryption](Images/cbc_en.png)
+
+### CBC mode decryption
+![cbc_decryption](Images/cbc_de.png)

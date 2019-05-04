@@ -18,8 +18,8 @@ const (
 
 type cipher32 struct {
 	S      [t]uint32 //The round subkey words that used in each round
-	Mode   int
-	Vector uint64
+	Mode   int       // indicate mode of cipher
+	Vector uint64    // used to store the Vector used next block
 }
 
 func RC5_SETUP(key []byte, iv []byte, mode string) (cipher32, bool) {
