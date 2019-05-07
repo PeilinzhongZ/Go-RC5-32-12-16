@@ -56,8 +56,6 @@ func RC5_SETUP(key []byte, iv []byte, mode string) (cipher32, bool) {
 	}
 	if mode == "CBC" {
 		return cipher32{S, 1, binary.BigEndian.Uint64(iv)}, true
-	} else if mode == "CFB" {
-		return cipher32{S, 2, binary.BigEndian.Uint64(iv)}, true
 	}
 	return cipher32{S, 0, 0}, true
 }
